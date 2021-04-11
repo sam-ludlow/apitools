@@ -69,7 +69,7 @@ const main = async () => {
 	const url = VARS['API_URL_NODE'];
 
 	// Get all groups and users at the same time
-	const [groups, users] = await Promise.all([
+	let [groups, users] = await Promise.all([
 		Tools.GetAll(`${url}/groups/search`, defaultUser.headers),
 		Tools.GetAll(`${url}/users/search`, defaultUser.headers),
 	]);
@@ -89,6 +89,7 @@ const main = async () => {
 
 	const testId = (new Date()).toISOString();
 	const requestCount = 10;
+	const updatedUserUUIDs = [];
 
 	/**
 	 * Perform some updates on users (in sequence)
@@ -96,6 +97,7 @@ const main = async () => {
 	for (let requestId = 0; requestId < requestCount; ++requestId) {
 		// Take a user out the list at random
 		const user = Tools.RandomElement(users, true);
+		updatedUserUUIDs.push(user.uuid);
 
 		const start = new Date();
 
@@ -120,6 +122,7 @@ const main = async () => {
 	await Promise.all(requestIds.map(async (requestId) => {
 
 		const user = Tools.RandomElement(users, true);
+		updatedUserUUIDs.push(user.uuid);
 
 		console.log(`concurrent ${requestId}`);
 
@@ -138,7 +141,22 @@ const main = async () => {
 		console.log(`concurrent ${requestId} ${user.uuid} ${took} ${response.status}`);
 	}));
 
+	await Tools.Sleep(10);
 
+	/**
+	 * See if they updated
+	 */
+	users = await Tools.GetAll(`${url}/users/search`, defaultUser.headers);
+	users.forEach((user) => {
+		if (user.external_id === testId) {
+			const index = updatedUserUUIDs.indexOf(user.uuid);
+			if (index === -1)
+				throw new Error('unexpected user was updated');
+			updatedUserUUIDs.splice(index, 1); 
+		}
+
+	});
+	console.log(`Users not updated: ${JSON.stringify(updatedUserUUIDs)}`);
 
 }
 

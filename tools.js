@@ -49,6 +49,8 @@ export const LoadVaribles = (varibles) => {
 	});
 }
 
+export const Sleep = (seconds) => new Promise(resolve => setTimeout(resolve, seconds * 1000));
+
 export const HttpRequest = async ({
 	url,
 	method,
