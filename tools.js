@@ -259,4 +259,6 @@ export const WriteHtmlReport = async (filename, report) => {
 	html += '</body></html>';
 
 	await WriteFile(filename, html);
+
+	console.log(`REPORT SAVED: ${filename}`);
 }
