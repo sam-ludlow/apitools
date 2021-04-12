@@ -1,7 +1,7 @@
 # apitools
 Simple node.js API Tools.
 
-Please look at the example code in "index.js"
+Please look at the example code in "index.js". A few simple operations are performed and a report saved to "report.html".
 
 ## Prerequisites
 Have Node.js installed.
