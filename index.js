@@ -13,17 +13,17 @@ const setup = async () => {
 		VARS['SITE_URL'] = VARS['SITE_URL'].slice(0, -1);
 	}
 
-	if (!VARS['USER'])
-		VARS['USER'] = 'webmaster';
-	if (!USERS[VARS['USER']])
-		throw new Error(`The default user does not exist: ${VARS['USER']}`);
+	if (!VARS['DEFAULT_USER'])
+		VARS['DEFAULT_USER'] = 'webmaster';
+	if (!USERS[VARS['DEFAULT_USER']])
+		throw new Error(`The default user does not exist: ${VARS['DEFAULT_USER']}`);
 
 	VARS['API_URL_NODE'] = `${VARS['SITE_URL']}/api/0.3`;
 	VARS['API_URL_DRUPAL'] = `${VARS['SITE_URL']}/api`;
 
 	console.log(`Using Node.js API: ${VARS['API_URL_NODE']}`);
 	console.log(`Using Drupal API: ${VARS['API_URL_DRUPAL']}`);
-	console.log(`Using Default User: ${VARS['USER']} ${USERS[VARS['USER']].username}`);
+	console.log(`Using Default User: ${VARS['DEFAULT_USER']} ${USERS[VARS['DEFAULT_USER']].username}`);
 
 	await Tools.LoginUsers(VARS['API_URL_NODE'], USERS);
 }
@@ -65,7 +65,7 @@ const main = async () => {
 	await setup();
 
 	// grab a few varibles
-	const defaultUser = USERS[VARS['USER']];
+	const defaultUser = USERS[VARS['DEFAULT_USER']];
 	const url = VARS['API_URL_NODE'];
 
 	// Get all groups and users at the same time
@@ -88,7 +88,7 @@ const main = async () => {
 
 
 	const testId = (new Date()).toISOString();
-	const requestCount = 10;
+	const requestCount = 7;
 	const updatedUserUUIDs = [];
 
 	/**
@@ -160,4 +160,4 @@ const main = async () => {
 
 }
 
-await main();
+main();
