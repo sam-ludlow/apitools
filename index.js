@@ -88,7 +88,7 @@ const main = async () => {
 
 
 	const testId = (new Date()).toISOString();
-	const requestCount = 7;
+	const requestCount = 5;
 	const updatedUserUUIDs = [];
 
 	/**
@@ -141,7 +141,7 @@ const main = async () => {
 		console.log(`concurrent ${requestId} ${user.uuid} ${took} ${response.status}`);
 	}));
 
-	await Tools.Sleep(10);
+	await Tools.Sleep(3);
 
 	/**
 	 * See if they updated
@@ -160,4 +160,16 @@ const main = async () => {
 
 }
 
-main();
+const mainWrap = async () => {
+	try {
+		await main();
+	} catch (error) {
+		console.log('############## ERROR ########################');
+		console.log(error);
+		console.log('#############################################');
+		console.log(error.message);
+		console.log('#############################################');
+	}
+};
+
+mainWrap();
