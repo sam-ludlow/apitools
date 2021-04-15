@@ -56,10 +56,107 @@ const userRolesReport = (users, report) => {
 	});
 }
 
+const main = async () => {
+
+	// Perform setup
+	await setup();
+
+	// grab a few varibles
+	const defaultUser = USERS[VARS['DEFAULT_USER']];
+	const url = VARS['API_URL_NODE'];
+
+	const feeds = [];
+
+	const startAll = new Date();
+
+	for (let page = 0; page < 8; ++page) {
+		const response = await Tools.HttpRequest({
+			url: `${url}/feeds?page=${page}`,
+			method: 'GET',
+			headers: defaultUser.headers,
+		});
+		if (response.status !== 200)
+			throw new Error(`Get feeds ${response.status}`);
+
+		feeds.push(...response.data.results);
+	}
+
+	const contentLocations = [];
+	const userUUIDs = [];
+
+	feeds.forEach((feeds) => {
+
+		if (feeds.entity_location && !contentLocations.includes(feeds.entity_location))
+			contentLocations.push(feeds.entity_location);
+
+		if (feeds.content_location && !contentLocations.includes(feeds.content_location))
+			contentLocations.push(feeds.content_location);
+
+		if (feeds.group_members) {
+			feeds.group_members.forEach((member) => {
+				if (!userUUIDs.includes(member.uuid))
+					userUUIDs.push(member.uuid);
+			});
+		}
+
+	});
+
+	const subRequests = [];
+
+	await Promise.all(userUUIDs.map(async (userUUID) => {
+		const start = new Date();
+		const response = await Tools.HttpRequest({
+			headers: defaultUser.headers,
+			method: 'GET',
+			url: `${url}/users/${userUUID}`,
+		});
+		const took = ((new Date()) - start) / 1000;
+
+		console.log(`user ${userUUID} ${took} ${response.status}`);
+
+		subRequests.push({
+			userUUID,
+			took,
+			status: response.status,
+		});
+	}));
+
+	await Promise.all(contentLocations.map(async (contentLocation) => {
+		const start = new Date();
+		const response = await Tools.HttpRequest({
+			headers: defaultUser.headers,
+			method: 'GET',
+			url: contentLocation,
+		});
+		const took = ((new Date()) - start) / 1000;
+
+		console.log(`contentLocation ${contentLocation} ${took} ${response.status}`);
+
+		subRequests.push({
+			contentLocation,
+			took,
+			status: response.status,
+		});
+	}));
+
+	const allTook = ((new Date()) - startAll) / 1000;
+
+	console.log(`allTook ${allTook}`);
+
+	const report = {};
+	report[`subRequests ${subRequests.length}`] = subRequests;
+	report[`Feeds ${feeds.length}`] = feeds;
+	report[`contentLocations ${contentLocations.length}`] = contentLocations;
+	report[`userUUIDs ${userUUIDs.length}`] = userUUIDs;
+
+	await Tools.WriteHtmlReport('report.html', report);
+}
+
+
 /**
  * Your code here !!!!!!!!
  */
-const main = async () => {
+const mainOLD = async () => {
 
 	// Perform setup
 	await setup();
