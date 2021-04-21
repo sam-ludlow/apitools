@@ -99,8 +99,6 @@ const main = async () => {
 		const user = Tools.RandomElement(users, true);
 		updatedUserUUIDs.push(user.uuid);
 
-		const start = new Date();
-
 		// Peform API request
 		const response = await Tools.HttpRequest({
 			headers: defaultUser.headers,
@@ -110,9 +108,8 @@ const main = async () => {
 				external_id: testId,
 			},
 		});
-		const took = ((new Date()) - start) / 1000;
 
-		console.log(`sequence ${requestId} ${user.uuid} ${took} ${response.status}`);
+		console.log(`sequence ${requestId} ${user.uuid} ${response.took} ${response.status}`);
 	}
 
 	/**
@@ -126,8 +123,6 @@ const main = async () => {
 
 		console.log(`concurrent ${requestId}`);
 
-		const start = new Date();
-
 		const response = await Tools.HttpRequest({
 			headers: defaultUser.headers,
 			method: 'PUT',
@@ -136,9 +131,8 @@ const main = async () => {
 				external_id: testId,
 			},
 		});
-		const took = ((new Date()) - start) / 1000;
 
-		console.log(`concurrent ${requestId} ${user.uuid} ${took} ${response.status}`);
+		console.log(`concurrent ${requestId} ${user.uuid} ${response.took} ${response.status}`);
 	}));
 
 	await Tools.Sleep(3);
