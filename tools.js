@@ -82,6 +82,8 @@ export const HttpRequest = async ({
 
 	return new Promise((resolve, reject) => {
 
+		const start = new Date();
+		
 		const request = client.request(options, (response) => {
 			let responseData = '';
 
@@ -99,6 +101,7 @@ export const HttpRequest = async ({
 					statusText: response.statusMessage,
 					headers: response.headers,
 					data: responseData,
+					took: ((new Date()) - start) / 1000,
 				});
 			});
 		});
