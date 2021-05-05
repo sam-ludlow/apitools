@@ -69,7 +69,7 @@ const main = async () => {
 
 	const startAll = new Date();
 
-	for (let page = 0; page < 8; ++page) {
+	for (let page = 0; page < 1; ++page) {
 		const response = await Tools.HttpRequest({
 			url: `${url}/feeds?page=${page}`,
 			method: 'GET',
