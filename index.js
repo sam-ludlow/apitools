@@ -105,7 +105,7 @@ const main = async () => {
 			method: 'PUT',
 			url: `${url}/users/${user.uuid}`,
 			data: {
-				external_id: testId,
+				external_id: `${testId}-A-${requestId}`,
 			},
 		});
 
@@ -128,7 +128,7 @@ const main = async () => {
 			method: 'PUT',
 			url: `${url}/users/${user.uuid}`,
 			data: {
-				external_id: testId,
+				external_id: `${testId}-B-${requestId}`,
 			},
 		});
 
@@ -142,7 +142,7 @@ const main = async () => {
 	 */
 	users = await Tools.GetAll(`${url}/users/search`, defaultUser.headers);
 	users.forEach((user) => {
-		if (user.external_id === testId) {
+		if (user.external_id && user.external_id.startsWith(testId)) {
 			const index = updatedUserUUIDs.indexOf(user.uuid);
 			if (index === -1)
 				throw new Error('unexpected user was updated');
