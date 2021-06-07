@@ -196,20 +196,17 @@ const mainOLD = async () => {
 		const user = Tools.RandomElement(users, true);
 		updatedUserUUIDs.push(user.uuid);
 
-		const start = new Date();
-
 		// Peform API request
 		const response = await Tools.HttpRequest({
 			headers: defaultUser.headers,
 			method: 'PUT',
 			url: `${url}/users/${user.uuid}`,
 			data: {
-				external_id: testId,
+				external_id: `${testId}-A-${requestId}`,
 			},
 		});
-		const took = ((new Date()) - start) / 1000;
 
-		console.log(`sequence ${requestId} ${user.uuid} ${took} ${response.status}`);
+		console.log(`sequence ${requestId} ${user.uuid} ${response.took} ${response.status}`);
 	}
 
 	/**
@@ -223,19 +220,16 @@ const mainOLD = async () => {
 
 		console.log(`concurrent ${requestId}`);
 
-		const start = new Date();
-
 		const response = await Tools.HttpRequest({
 			headers: defaultUser.headers,
 			method: 'PUT',
 			url: `${url}/users/${user.uuid}`,
 			data: {
-				external_id: testId,
+				external_id: `${testId}-B-${requestId}`,
 			},
 		});
-		const took = ((new Date()) - start) / 1000;
 
-		console.log(`concurrent ${requestId} ${user.uuid} ${took} ${response.status}`);
+		console.log(`concurrent ${requestId} ${user.uuid} ${response.took} ${response.status}`);
 	}));
 
 	await Tools.Sleep(3);
@@ -245,7 +239,7 @@ const mainOLD = async () => {
 	 */
 	users = await Tools.GetAll(`${url}/users/search`, defaultUser.headers);
 	users.forEach((user) => {
-		if (user.external_id === testId) {
+		if (user.external_id && user.external_id.startsWith(testId)) {
 			const index = updatedUserUUIDs.indexOf(user.uuid);
 			if (index === -1)
 				throw new Error('unexpected user was updated');

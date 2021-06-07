@@ -82,6 +82,8 @@ export const HttpRequest = async ({
 
 	return new Promise((resolve, reject) => {
 
+		const start = new Date();
+		
 		const request = client.request(options, (response) => {
 			let responseData = '';
 
@@ -99,6 +101,7 @@ export const HttpRequest = async ({
 					statusText: response.statusMessage,
 					headers: response.headers,
 					data: responseData,
+					took: ((new Date()) - start) / 1000,
 				});
 			});
 		});
@@ -128,8 +131,13 @@ export const LoginUsers = async (url, users) => {
 			data: user,
 		});
 		if (response.status !== 200)
-			throw new Error(`Login failed ${response.status} ${response.statusText} ${JSON.stringify(response.data)}`);
-		user.headers = { 'cookie': response.headers['set-cookie'][0] };
+			throw new Error(`Login failed ${userKey} ${response.status} ${response.statusText} ${JSON.stringify(response.data)}`);
+
+		delete user.password;
+
+		const setCookies = response.headers['set-cookie'];
+		if (setCookies && setCookies.length)
+			user.headers = { 'cookie': setCookies.join('; ') };
 
 		response = await HttpRequest({
 			method: 'GET',
