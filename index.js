@@ -56,10 +56,69 @@ const userRolesReport = (users, report) => {
 	});
 }
 
+const main = async () => {
+
+	// Perform setup
+	await setup();
+
+	// grab a few varibles
+	const defaultUser = USERS[VARS['DEFAULT_USER']];
+	const url = VARS['API_URL_NODE'];
+	const testId = test.start.toISOString().replace(/:/g, '-');
+
+	//	Just for members/users (leave as is)
+	const groupUUID = '30c22118-b669-42f1-9180-9ffc332920e7';
+	
+	// post or content to make comments against
+	const postUUID = '0efbcca4-0ca7-43db-b203-bdc388122054';
+
+	const users = await Tools.GetAll(`${url}/groups/${groupUUID}/members`, defaultUser.headers);
+
+	let lastCommentUUID = postUUID;
+
+	for (let id = 0; id < 1000; ++id) {
+
+		const user = Tools.RandomElement(users, false);
+
+		console.log(user.uuid);
+
+		const data = {
+			body: `${testId} ${id} You can tell your ma I moved to Arkansas. Or you can tell your dog to bite my leg. Or tell your brother Cliff who's fist can tell my lips. He never really liked me anyway.`,
+			parent_uuid: lastCommentUUID,
+			author_uuid: user.uuid,
+		};
+
+		let response;
+
+		do {
+			response = await Tools.HttpRequest({
+				headers: defaultUser.headers,
+				method: 'POST',
+				url: `${url}/comments`,
+				data,
+			});
+	
+			if (response.status !== 201) {
+				console.log(JSON.stringify(response.status));
+			}
+		} while (response.status !== 201);
+
+		if (!Math.floor(Math.random() * 5)) {
+			lastCommentUUID = response.data.uuid;
+			await Tools.Sleep(2);
+		} else {
+			lastCommentUUID = postUUID;
+		}
+		
+	}
+
+}
+
+
 /**
  * Your code here !!!!!!!!
  */
-const main = async () => {
+const mainOLD = async () => {
 
 	// Perform setup
 	await setup();
