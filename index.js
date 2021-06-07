@@ -64,23 +64,32 @@ const main = async () => {
 	// grab a few varibles
 	const defaultUser = USERS[VARS['DEFAULT_USER']];
 	const url = VARS['API_URL_NODE'];
-	const testId = test.start.toISOString().replace(/:/g, '-');
+	const testId = (new Date()).toISOString().replace(/:/g, '-');
 
-	//	Just for members/users (leave as is)
+
+
+	//	Just for members/users (leave as is for content)
 	const groupUUID = '30c22118-b669-42f1-9180-9ffc332920e7';
 	
 	// post or content to make comments against
+	//	http://invotra.test/news/your-brand-new-homepage
 	const postUUID = '0efbcca4-0ca7-43db-b203-bdc388122054';
+
+	// how many
+	const count = 10;
+
+
 
 	const users = await Tools.GetAll(`${url}/groups/${groupUUID}/members`, defaultUser.headers);
 
+
 	let lastCommentUUID = postUUID;
 
-	for (let id = 0; id < 1000; ++id) {
+	for (let id = 0; id < count; ++id) {
 
 		const user = Tools.RandomElement(users, false);
 
-		console.log(user.uuid);
+		
 
 		const data = {
 			body: `${testId} ${id} You can tell your ma I moved to Arkansas. Or you can tell your dog to bite my leg. Or tell your brother Cliff who's fist can tell my lips. He never really liked me anyway.`,
@@ -99,7 +108,7 @@ const main = async () => {
 			});
 	
 			if (response.status !== 201) {
-				console.log(JSON.stringify(response.status));
+				console.log(response.status);
 			}
 		} while (response.status !== 201);
 
@@ -109,7 +118,9 @@ const main = async () => {
 		} else {
 			lastCommentUUID = postUUID;
 		}
-		
+
+		console.log(response.data.uuid + ' # ' + user.uuid);
+
 	}
 
 }
