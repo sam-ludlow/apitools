@@ -56,10 +56,103 @@ const userRolesReport = (users, report) => {
 	});
 }
 
+const main = async () => {
+
+	// Perform setup
+	await setup();
+
+	// grab a few varibles
+	const defaultUser = USERS[VARS['DEFAULT_USER']];
+	const url = VARS['API_URL_NODE'];
+	const testId = (new Date()).toISOString().replace(/:/g, '-');
+
+
+	//	If logins start failing
+	//	TRUNCATE TABLE invotra.flood;
+
+	// public will join, private request to join
+	const groupUUID = '30c22118-b669-42f1-9180-9ffc332920e7';
+	
+	// 4k & L2 fill in !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	const passwords = ['', ''];
+
+	// how many
+	let count = 10;
+
+	let [allUsers, existingMemberUsers] = await Promise.all([
+		Tools.GetAll(`${url}/users/search`, defaultUser.headers),
+		Tools.GetAll(`${url}/groups/${groupUUID}/members`, defaultUser.headers),
+	]);
+
+	const notMemberUsers = allUsers.filter((user) => {
+		return existingMemberUsers.filter((memberUser) => memberUser.uuid === user.uuid).length === 0;
+	});
+
+	const targetUsers = [];
+
+	//	NOTE: The API dont currently allow group member operations on not your self !!!
+	// So have to login as each user
+	while (targetUsers.length < count) {
+		const user = Tools.RandomElement(notMemberUsers, true);
+		for (const password of passwords) {
+			let response = await Tools.HttpRequest({
+				method: 'POST',
+				url: `${url}/sessions/login`,
+				data: {
+					username: user.username,
+					password,
+				},
+			});
+			if (response.status === 200) {
+				const setCookies = response.headers['set-cookie'];
+				if (setCookies && setCookies.length) {
+					user.headers = { 'cookie': setCookies.join('; ') };
+
+					console.log(user.username + ' Login OK');
+					targetUsers.push(user);
+					break;
+				}
+			}
+
+			console.log(user.username + ' Login BAD');
+		}
+	}
+
+
+	console.log('allUsers: ' + allUsers.length);
+	console.log('existingMemberUsers: ' + existingMemberUsers.length);
+	console.log('notMemberUsers: ' + notMemberUsers.length);
+	console.log('targetUsers: ' + targetUsers.length);
+
+	while ((count-- > 0) && targetUsers.length > 0) {
+
+		const user = Tools.RandomElement(targetUsers, true);
+		
+ 		let response;
+
+		do {
+			response = await Tools.HttpRequest({
+				headers: user.headers,
+				method: 'PUT',
+				url: `${url}/groups/${groupUUID}/members/${user.uuid}`,
+				data: {
+					type: 'member',
+				},
+			});
+	
+			if (response.status !== 200) {
+				console.log(response.status);
+			} else {
+				console.log(`${groupUUID} / ${user.uuid}`);
+			}
+		} while (response.status !== 200);
+	}
+}
+
 /**
  * Your code here !!!!!!!!
  */
-const main = async () => {
+const mainOLD = async () => {
 
 	// Perform setup
 	await setup();
